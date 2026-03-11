@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AoutLink Online</title>
+
+    <style>
+
+        body{
+            font-family:Arial;
+            background:#f0f2f5;
+            margin:0;
+            padding:15px;
+        }
+
+        .container{
+            max-width:1200px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1{
+            text-align:center;
+            color:#2563eb;
+            margin-bottom:20px;
+        }
+
+        /* DASHBOARD */
+
+        .dashboard{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:15px;
+            margin-bottom:20px;
+        }
+
+        .card{
+            background:#f9fafb;
+            padding:15px;
+            border-radius:8px;
+            text-align:center;
+            box-shadow:0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .card h3{
+            margin:0;
+            font-size:14px;
+            color:#555;
+        }
+
+        .card p{
+            font-size:20px;
+            font-weight:bold;
+            margin-top:5px;
+            color:#2563eb;
+        }
+
+        /* FORM */
+
+        form{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+        }
+
+        input,select{
+            padding:10px;
+            border:1px solid #ccc;
+            border-radius:6px;
+            width:100%;
+        }
+
+        button{
+            padding:12px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:14px;
+        }
+
+        .addBtn{background:#2563eb;color:white;}
+        .deleteBtn{background:#ef4444;color:white;font-size:12px;padding:6px;}
+        .deleteAll{background:#dc2626;color:white;margin-top:10px;}
+        .exportBtn{background:#059669;color:white;margin-top:10px;}
+
+        /* CONTROLS */
+
+        .controls{
+            display:flex;
+            gap:10px;
+            margin-top:15px;
+            flex-wrap:wrap;
+        }
+
+        /* TABLE */
+
+        .table-container{
+            margin-top:20px;
+            max-height:350px;
+            overflow:auto;
+            border:1px solid #ddd;
+            border-radius:6px;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th,td{
+            padding:10px;
+            border-bottom:1px solid #ddd;
+            font-size:14px;
+        }
+
+        th{
+            background:#f3f4f6;
+            text-align:left;
+        }
+
+        /* MOBILE */
+
+        @media(max-width:700px){
+
+            form{
+                grid-template-columns:1fr;
+            }
+
+            .dashboard{
+                grid-template-columns:1fr;
+            }
+
+            .controls{
+                flex-direction:column;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>AoutLink Online</h1>
+
+    <!-- DASHBOARD -->
+
+    <div class="dashboard">
+
+        <div class="card">
+            <h3>Total Cars</h3>
+            <p id="totalCars">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Commission</h3>
+            <p id="totalCommission">KSh 0</p>
+        </div>
+
+        <div class="card">
+            <h3>Pending Deals</h3>
+            <p id="pendingDeals">0</p>
+        </div>
+
+    </div>
+
+    <!-- FORM -->
+
+    <form id="carForm">
+
+        <input type="text" id="carModel" placeholder="Car Model" required>
+        <input type="text" id="sellerName" placeholder="Seller Name" required>
+
+        <input type="number" id="listingPrice" placeholder="Listing Price" required>
+        <input type="number" id="sellerPrice" placeholder="Seller Price" required>
+
+        <input type="text" id="buyerName" placeholder="Buyer Name">
+
+        <select id="paymentStatus">
+            <option>Pending</option>
+            <option>Paid</option>
+        </select>
+
+        <input type="text" id="notes" placeholder="Notes">
+
+        <button class="addBtn">Add Car</button>
+
+    </form>
+
+    <!-- CONTROLS -->
+
+    <div class="controls">
+
+        <input type="text" id="searchBox" placeholder="Search car, seller or buyer">
+
+        <select id="filterStatus">
+            <option value="All">All Sales</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+        </select>
+
+    </div>
+
+    <button class="exportBtn" onclick="exportData()">Export to Excel</button>
+    <button class="deleteAll" onclick="deleteAll()">Delete All</button>
+
+    <!-- TABLE -->
+
+    <div class="table-container">
+
+        <table id="carTable">
+
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Car</th>
+                <th>Seller</th>
+                <th>Listing</th>
+                <th>Seller Price</th>
+                <th>Commission</th>
+                <th>Buyer</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+    let carData = JSON.parse(localStorage.getItem("carData")) || [];
+
+    function saveData(){
+        localStorage.setItem("carData",JSON.stringify(carData));
+    }
+
+    function formatKES(num){
+        return "KSh "+num.toLocaleString();
+    }
+
+    function updateDashboard(){
+
+        let totalCars = carData.length;
+
+        let totalCommission = 0;
+        let pending = 0;
+
+        carData.forEach(car=>{
+
+            let commission = car.listingPrice - car.sellerPrice;
+
+            totalCommission += commission;
+
+            if(car.paymentStatus==="Pending"){
+                pending++;
+            }
+
+        });
+
+        document.getElementById("totalCars").innerText = totalCars;
+        document.getElementById("totalCommission").innerText = formatKES(totalCommission);
+        document.getElementById("pendingDeals").innerText = pending;
+
+    }
+
+    function updateTable(){
+
+        let tbody = document.querySelector("#carTable tbody");
+        tbody.innerHTML = "";
+
+        let search = document.getElementById("searchBox").value.toLowerCase();
+        let filter = document.getElementById("filterStatus").value;
+
+        carData.forEach((car,index)=>{
+
+            let commission = car.listingPrice - car.sellerPrice;
+
+            let text = (car.carModel + car.sellerName + car.buyerName).toLowerCase();
+
+            if(!text.includes(search)) return;
+
+            if(filter!="All" && car.paymentStatus!=filter) return;
+
+            let row=document.createElement("tr");
+
+            row.innerHTML=`
+
+<td>${car.date}</td>
+<td>${car.carModel}</td>
+<td>${car.sellerName}</td>
+<td>${formatKES(car.listingPrice)}</td>
+<td>${formatKES(car.sellerPrice)}</td>
+<td>${formatKES(commission)}</td>
+<td>${car.buyerName}</td>
+<td>${car.paymentStatus}</td>
+<td>${car.notes}</td>
+<td><button class="deleteBtn" onclick="deleteCar(${index})">Delete</button></td>
+
+`;
+
+            tbody.appendChild(row);
+
+        });
+
+        updateDashboard();
+
+    }
+
+    function deleteCar(index){
+
+        if(confirm("Delete this record?")){
+
+            carData.splice(index,1);
+
+            saveData();
+
+            updateTable();
+
+        }
+
+    }
+
+    function deleteAll(){
+
+        if(confirm("Delete ALL records?")){
+
+            carData=[];
+
+            saveData();
+
+            updateTable();
+
+        }
+
+    }
+
+    function exportData(){
+
+        let csv="Date,Car,Seller,Listing,SellerPrice,Buyer,Status,Notes\n";
+
+        carData.forEach(car=>{
+
+            csv+=`${car.date},${car.carModel},${car.sellerName},${car.listingPrice},${car.sellerPrice},${car.buyerName},${car.paymentStatus},${car.notes}\n`;
+
+        });
+
+        let blob=new Blob([csv],{type:"text/csv"});
+
+        let link=document.createElement("a");
+
+        link.href=URL.createObjectURL(blob);
+
+        link.download="AoutLink_sales.csv";
+
+        link.click();
+
+    }
+
+    document.getElementById("carForm").addEventListener("submit",function(e){
+
+        e.preventDefault();
+
+        let car={
+
+            date:new Date().toLocaleDateString(),
+
+            carModel:carModel.value,
+            sellerName:sellerName.value,
+
+            listingPrice:parseFloat(listingPrice.value),
+            sellerPrice:parseFloat(sellerPrice.value),
+
+            buyerName:buyerName.value,
+            paymentStatus:paymentStatus.value,
+
+            notes:notes.value
+
+        };
+
+        carData.push(car);
+
+        saveData();
+
+        updateTable();
+
+        this.reset();
+
+    });
+
+    document.getElementById("searchBox").addEventListener("input",updateTable);
+    document.getElementById("filterStatus").addEventListener("change",updateTable);
+
+    updateTable();
+
+</script>
+
+</body>
+</html>
