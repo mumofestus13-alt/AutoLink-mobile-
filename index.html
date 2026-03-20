@@ -1,415 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>AoutLink Online</title>
-
     <style>
-
-        body{
-            font-family:Arial;
-            background:#f0f2f5;
-            margin:0;
-            padding:15px;
-        }
-
-        .container{
-            max-width:1200px;
-            margin:auto;
-            background:white;
-            padding:20px;
-            border-radius:10px;
-            box-shadow:0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h1{
-            text-align:center;
-            color:#2563eb;
-            margin-bottom:20px;
-        }
-
-        /* DASHBOARD */
-
-        .dashboard{
-            display:grid;
-            grid-template-columns:repeat(3,1fr);
-            gap:15px;
-            margin-bottom:20px;
-        }
-
-        .card{
-            background:#f9fafb;
-            padding:15px;
-            border-radius:8px;
-            text-align:center;
-            box-shadow:0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .card h3{
-            margin:0;
-            font-size:14px;
-            color:#555;
-        }
-
-        .card p{
-            font-size:20px;
-            font-weight:bold;
-            margin-top:5px;
-            color:#2563eb;
-        }
-
-        /* FORM */
-
-        form{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:10px;
-        }
-
-        input,select{
-            padding:10px;
-            border:1px solid #ccc;
-            border-radius:6px;
-            width:100%;
-        }
-
-        button{
-            padding:12px;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
-            font-size:14px;
-        }
-
+        body{ font-family:Arial; background:#f0f2f5; margin:0; padding:15px; }
+        .container{ max-width:1200px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+        h1{ text-align:center; color:#2563eb; margin-bottom:20px; }
+        .tabs{ display:flex; gap:5px; margin-bottom:15px; }
+        .tabs button{ flex:1; padding:10px; border:none; background:#2563eb; color:white; cursor:pointer; border-radius:5px 5px 0 0; }
+        .tabs button.active{ background:#059669; }
+        .section{ display:none; }
+        .section.active{ display:block; }
+        .dashboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
+        .card{ background:#f9fafb; padding:15px; border-radius:8px; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+        .card h3{ margin:0; font-size:14px; color:#555; }
+        .card p{ font-size:20px; font-weight:bold; margin-top:5px; color:#2563eb; }
+        form{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px; }
+        input,select{ padding:10px; border:1px solid #ccc; border-radius:6px; width:100%; }
+        button{ padding:12px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
         .addBtn{background:#2563eb;color:white;}
         .deleteBtn{background:#ef4444;color:white;font-size:12px;padding:6px;}
         .deleteAll{background:#dc2626;color:white;margin-top:10px;}
         .exportBtn{background:#059669;color:white;margin-top:10px;}
-
-        /* CONTROLS */
-
-        .controls{
-            display:flex;
-            gap:10px;
-            margin-top:15px;
-            flex-wrap:wrap;
-        }
-
-        /* TABLE */
-
-        .table-container{
-            margin-top:20px;
-            max-height:350px;
-            overflow:auto;
-            border:1px solid #ddd;
-            border-radius:6px;
-        }
-
-        table{
-            width:100%;
-            border-collapse:collapse;
-        }
-
-        th,td{
-            padding:10px;
-            border-bottom:1px solid #ddd;
-            font-size:14px;
-        }
-
-        th{
-            background:#f3f4f6;
-            text-align:left;
-        }
-
-        /* MOBILE */
-
+        .table-container{ margin-top:10px; max-height:300px; overflow:auto; border:1px solid #ddd; border-radius:6px; }
+        table{ width:100%; border-collapse:collapse; }
+        th,td{ padding:8px; border-bottom:1px solid #ddd; font-size:14px; }
+        th{ background:#f3f4f6; text-align:left; }
         @media(max-width:700px){
-
-            form{
-                grid-template-columns:1fr;
-            }
-
-            .dashboard{
-                grid-template-columns:1fr;
-            }
-
-            .controls{
-                flex-direction:column;
-            }
-
+            form{ grid-template-columns:1fr; }
+            .dashboard{ grid-template-columns:1fr; }
         }
-
     </style>
-
 </head>
-
 <body>
-
 <div class="container">
+    <h1>AoutLink Online - Broker Dashboard</h1>
 
-    <h1>AoutLink Online</h1>
-
-    <!-- DASHBOARD -->
-
-    <div class="dashboard">
-
-        <div class="card">
-            <h3>Total Cars</h3>
-            <p id="totalCars">0</p>
-        </div>
-
-        <div class="card">
-            <h3>Total Commission</h3>
-            <p id="totalCommission">KSh 0</p>
-        </div>
-
-        <div class="card">
-            <h3>Pending Deals</h3>
-            <p id="pendingDeals">0</p>
-        </div>
-
+    <!-- NAV TABS -->
+    <div class="tabs">
+        <button class="active" onclick="showTab('sales')">Sales</button>
+        <button onclick="showTab('dealers')">Dealers</button>
+        <button onclick="showTab('cars')">Cars</button>
+        <button onclick="showTab('buyers')">Buyers</button>
+        <button onclick="showTab('deals')">Deals</button>
     </div>
 
-    <!-- FORM -->
-
-    <form id="carForm">
-
-        <input type="text" id="carModel" placeholder="Car Model" required>
-        <input type="text" id="sellerName" placeholder="Seller Name" required>
-
-        <input type="number" id="listingPrice" placeholder="Listing Price" required>
-        <input type="number" id="sellerPrice" placeholder="Seller Price" required>
-
-        <input type="text" id="buyerName" placeholder="Buyer Name">
-
-        <select id="paymentStatus">
-            <option>Pending</option>
-            <option>Paid</option>
-        </select>
-
-        <input type="text" id="notes" placeholder="Notes">
-
-        <button class="addBtn">Add Car</button>
-
-    </form>
-
-    <!-- CONTROLS -->
-
-    <div class="controls">
-
-        <input type="text" id="searchBox" placeholder="Search car, seller or buyer">
-
-        <select id="filterStatus">
-            <option value="All">All Sales</option>
-            <option value="Paid">Paid</option>
-            <option value="Pending">Pending</option>
-        </select>
-
+    <!-- ================== SALES SECTION ================== -->
+    <div id="sales" class="section active">
+        <div class="dashboard">
+            <div class="card"><h3>Total Cars</h3><p id="totalCars">0</p></div>
+            <div class="card"><h3>Total Commission</h3><p id="totalCommission">KSh 0</p></div>
+            <div class="card"><h3>Pending Deals</h3><p id="pendingDeals">0</p></div>
+        </div>
+        <form id="carForm">
+            <input type="text" id="carModel" placeholder="Car Model" required>
+            <input type="text" id="sellerName" placeholder="Seller Name" required>
+            <input type="number" id="listingPrice" placeholder="Listing Price" required>
+            <input type="number" id="sellerPrice" placeholder="Seller Price" required>
+            <input type="text" id="buyerName" placeholder="Buyer Name">
+            <select id="paymentStatus">
+                <option>Pending</option>
+                <option>Paid</option>
+            </select>
+            <input type="text" id="notes" placeholder="Notes">
+            <button class="addBtn">Add Car</button>
+        </form>
+        <div class="table-container">
+            <table id="carTable">
+                <thead>
+                <tr>
+                    <th>Date</th><th>Car</th><th>Seller</th><th>Listing</th><th>Seller Price</th><th>Commission</th><th>Buyer</th><th>Status</th><th>Notes</th><th>Action</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="controls">
+            <input type="text" id="searchBox" placeholder="Search car, seller or buyer">
+            <select id="filterStatus">
+                <option value="All">All Sales</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+            </select>
+        </div>
+        <button class="exportBtn" onclick="exportData()">Export to Excel</button>
+        <button class="deleteAll" onclick="deleteAll()">Delete All</button>
     </div>
 
-    <button class="exportBtn" onclick="exportData()">Export to Excel</button>
-    <button class="deleteAll" onclick="deleteAll()">Delete All</button>
+    <!-- ================== DEALERS SECTION ================== -->
+    <div id="dealers" class="section">
+        <h2>Dealers</h2>
+        <form id="dealerForm">
+            <input type="text" id="dealerName" placeholder="Dealer Name">
+            <input type="text" id="dealerPhone" placeholder="Phone">
+            <input type="text" id="dealerLocation" placeholder="Location">
+            <button class="addBtn" type="button" onclick="addDealer()">Add Dealer</button>
+        </form>
+        <button class="deleteAll" onclick="clearDealers()">Delete All Dealers</button>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Name</th><th>Phone</th><th>Location</th><th>Action</th></tr></thead>
+                <tbody id="dealerTable"></tbody>
+            </table>
+        </div>
+    </div>
 
-    <!-- TABLE -->
+    <!-- ================== CARS SECTION ================== -->
+    <div id="cars" class="section">
+        <h2>Cars from Dealers</h2>
+        <form id="dealerCarsForm">
+            <input type="text" id="dealerCarModel" placeholder="Car Model">
+            <input type="text" id="dealerCarDealer" placeholder="Dealer Name">
+            <input type="number" id="dealerPrice" placeholder="Dealer Price">
+            <input type="number" id="yourPrice" placeholder="Your Price">
+            <select id="carStatus">
+                <option>Available</option>
+                <option>Sold</option>
+            </select>
+            <button class="addBtn" type="button" onclick="addDealerCar()">Add Car</button>
+        </form>
+        <button class="deleteAll" onclick="clearDealerCars()">Delete All Cars</button>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Car</th><th>Dealer</th><th>Dealer Price</th><th>Your Price</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="dealerCarTable"></tbody>
+            </table>
+        </div>
+    </div>
 
-    <div class="table-container">
+    <!-- ================== BUYERS SECTION ================== -->
+    <div id="buyers" class="section">
+        <h2>Buyers</h2>
+        <form id="buyersForm">
+            <input type="text" id="buyerNameInput" placeholder="Buyer Name">
+            <input type="text" id="buyerPhone" placeholder="Phone">
+            <input type="text" id="buyerBudget" placeholder="Budget">
+            <input type="text" id="buyerCar" placeholder="Interested Car">
+            <button class="addBtn" type="button" onclick="addBuyer()">Add Buyer</button>
+        </form>
+        <button class="deleteAll" onclick="clearBuyers()">Delete All Buyers</button>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Name</th><th>Phone</th><th>Budget</th><th>Car</th><th>Action</th></tr></thead>
+                <tbody id="buyerTable"></tbody>
+            </table>
+        </div>
+    </div>
 
-        <table id="carTable">
-
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Car</th>
-                <th>Seller</th>
-                <th>Listing</th>
-                <th>Seller Price</th>
-                <th>Commission</th>
-                <th>Buyer</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-
-            <tbody></tbody>
-
-        </table>
-
+    <!-- ================== DEALS SECTION ================== -->
+    <div id="deals" class="section">
+        <h2>Deals</h2>
+        <form id="dealsForm">
+            <input type="text" id="dealCar" placeholder="Car">
+            <input type="text" id="dealBuyer" placeholder="Buyer">
+            <input type="number" id="dealSalePrice" placeholder="Sale Price">
+            <input type="number" id="dealDealerPrice" placeholder="Dealer Price">
+            <button class="addBtn" type="button" onclick="addDeal()">Add Deal</button>
+        </form>
+        <button class="deleteAll" onclick="clearDeals()">Delete All Deals</button>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr><th>Car</th><th>Buyer</th><th>Sale Price</th><th>Dealer Price</th><th>Commission</th><th>Action</th></tr>
+                </thead>
+                <tbody id="dealTable"></tbody>
+            </table>
+        </div>
+        <button class="exportBtn" onclick="exportDeals()">Export Deals to Excel</button>
+        <p class="summary" id="dealSummary"></p>
     </div>
 
 </div>
 
 <script>
-
-    let carData = JSON.parse(localStorage.getItem("carData")) || [];
-
-    function saveData(){
-        localStorage.setItem("carData",JSON.stringify(carData));
+    // ================= NAVIGATION =================
+    function showTab(tab){
+        document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+        document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+        document.getElementById(tab).classList.add("active");
+        event.currentTarget.classList.add("active");
     }
 
-    function formatKES(num){
-        return "KSh "+num.toLocaleString();
-    }
-
+    // ================== SALES ==================
+    let carData = JSON.parse(localStorage.getItem("carData"))||[];
+    function saveCarData(){ localStorage.setItem("carData",JSON.stringify(carData)); }
+    function formatKES(num){ return "KSh "+num.toLocaleString(); }
     function updateDashboard(){
-
-        let totalCars = carData.length;
-
-        let totalCommission = 0;
-        let pending = 0;
-
-        carData.forEach(car=>{
-
-            let commission = car.listingPrice - car.sellerPrice;
-
-            totalCommission += commission;
-
-            if(car.paymentStatus==="Pending"){
-                pending++;
-            }
-
+        let total=carData.length;
+        let totalCommission=0, pending=0;
+        carData.forEach(c=>{
+            let com = c.listingPrice-c.sellerPrice;
+            totalCommission+=com;
+            if(c.paymentStatus==="Pending") pending++;
         });
-
-        document.getElementById("totalCars").innerText = totalCars;
-        document.getElementById("totalCommission").innerText = formatKES(totalCommission);
-        document.getElementById("pendingDeals").innerText = pending;
-
+        document.getElementById("totalCars").innerText=total;
+        document.getElementById("totalCommission").innerText=formatKES(totalCommission);
+        document.getElementById("pendingDeals").innerText=pending;
     }
-
     function updateTable(){
-
-        let tbody = document.querySelector("#carTable tbody");
-        tbody.innerHTML = "";
-
-        let search = document.getElementById("searchBox").value.toLowerCase();
-        let filter = document.getElementById("filterStatus").value;
-
+        let tbody=document.querySelector("#carTable tbody");
+        tbody.innerHTML="";
+        let search=document.getElementById("searchBox").value.toLowerCase();
+        let filter=document.getElementById("filterStatus").value;
         carData.forEach((car,index)=>{
-
-            let commission = car.listingPrice - car.sellerPrice;
-
-            let text = (car.carModel + car.sellerName + car.buyerName).toLowerCase();
-
+            let com=car.listingPrice-car.sellerPrice;
+            let text=(car.carModel+car.sellerName+car.buyerName).toLowerCase();
             if(!text.includes(search)) return;
-
             if(filter!="All" && car.paymentStatus!=filter) return;
-
             let row=document.createElement("tr");
-
-            row.innerHTML=`
-
-<td>${car.date}</td>
-<td>${car.carModel}</td>
-<td>${car.sellerName}</td>
-<td>${formatKES(car.listingPrice)}</td>
-<td>${formatKES(car.sellerPrice)}</td>
-<td>${formatKES(commission)}</td>
-<td>${car.buyerName}</td>
-<td>${car.paymentStatus}</td>
-<td>${car.notes}</td>
-<td><button class="deleteBtn" onclick="deleteCar(${index})">Delete</button></td>
-
-`;
-
+            row.innerHTML=`<td>${car.date}</td><td>${car.carModel}</td><td>${car.sellerName}</td><td>${formatKES(car.listingPrice)}</td><td>${formatKES(car.sellerPrice)}</td><td>${formatKES(com)}</td><td>${car.buyerName}</td><td>${car.paymentStatus}</td><td>${car.notes}</td><td><button class="deleteBtn" onclick="deleteCar(${index})">Delete</button></td>`;
             tbody.appendChild(row);
-
         });
-
         updateDashboard();
-
     }
-
-    function deleteCar(index){
-
-        if(confirm("Delete this record?")){
-
-            carData.splice(index,1);
-
-            saveData();
-
-            updateTable();
-
-        }
-
-    }
-
-    function deleteAll(){
-
-        if(confirm("Delete ALL records?")){
-
-            carData=[];
-
-            saveData();
-
-            updateTable();
-
-        }
-
-    }
-
+    function deleteCar(i){ if(confirm("Delete this record?")){ carData.splice(i,1); saveCarData(); updateTable(); } }
+    function deleteAll(){ if(confirm("Delete ALL records?")){ carData=[]; saveCarData(); updateTable(); } }
     function exportData(){
-
         let csv="Date,Car,Seller,Listing,SellerPrice,Buyer,Status,Notes\n";
-
-        carData.forEach(car=>{
-
-            csv+=`${car.date},${car.carModel},${car.sellerName},${car.listingPrice},${car.sellerPrice},${car.buyerName},${car.paymentStatus},${car.notes}\n`;
-
-        });
-
-        let blob=new Blob([csv],{type:"text/csv"});
-
-        let link=document.createElement("a");
-
-        link.href=URL.createObjectURL(blob);
-
-        link.download="AoutLink_sales.csv";
-
-        link.click();
-
+        carData.forEach(c=>csv+=`${c.date},${c.carModel},${c.sellerName},${c.listingPrice},${c.sellerPrice},${c.buyerName},${c.paymentStatus},${c.notes}\n`);
+        let blob=new Blob([csv],{type:"text/csv"}); let link=document.createElement("a"); link.href=URL.createObjectURL(blob); link.download="AoutLink_sales.csv"; link.click();
     }
-
     document.getElementById("carForm").addEventListener("submit",function(e){
-
         e.preventDefault();
-
-        let car={
-
+        carData.push({
             date:new Date().toLocaleDateString(),
-
             carModel:carModel.value,
             sellerName:sellerName.value,
-
             listingPrice:parseFloat(listingPrice.value),
             sellerPrice:parseFloat(sellerPrice.value),
-
             buyerName:buyerName.value,
             paymentStatus:paymentStatus.value,
-
             notes:notes.value
-
-        };
-
-        carData.push(car);
-
-        saveData();
-
+        });
+        saveCarData();
         updateTable();
-
         this.reset();
-
     });
-
     document.getElementById("searchBox").addEventListener("input",updateTable);
     document.getElementById("filterStatus").addEventListener("change",updateTable);
-
     updateTable();
 
+    // ================= DEALERS =================
+    let dealers=JSON.parse(localStorage.getItem("dealers"))||[];
+    function saveDealers(){ localStorage.setItem("dealers",JSON.stringify(dealers)); }
+    function addDealer(){ dealers.push({name:dealerName.value, phone:dealerPhone.value, location:dealerLocation.value}); saveDealers(); renderDealers(); }
+    function deleteDealer(i){ dealers.splice(i,1); saveDealers(); renderDealers(); }
+    function clearDealers(){ if(confirm("Delete all dealers?")){ dealers=[]; saveDealers(); renderDealers(); } }
+    function renderDealers(){ let tbody=document.getElementById("dealerTable"); tbody.innerHTML=""; dealers.forEach((d,i)=>{ tbody.innerHTML+=`<tr><td>${d.name}</td><td>${d.phone}</td><td>${d.location}</td><td><button class="deleteBtn" onclick="deleteDealer(${i})">Delete</button></td></tr>`; }); }
+    renderDealers();
+
+    // ================= CARS FROM DEALERS =================
+    let dealerCars=JSON.parse(localStorage.getItem("dealerCars"))||[];
+    function saveDealerCars(){ localStorage.setItem("dealerCars",JSON.stringify(dealerCars)); }
+    function addDealerCar(){ dealerCars.push({model:dealerCarModel.value,dealer:dealerCarDealer.value,dealerPrice:parseFloat(dealerPrice.value),yourPrice:parseFloat(yourPrice.value),status:carStatus.value}); saveDealerCars(); renderDealerCars(); }
+    function deleteDealerCar(i){ dealerCars.splice(i,1); saveDealerCars(); renderDealerCars(); }
+    function clearDealerCars(){ if(confirm("Delete all dealer cars?")){ dealerCars=[]; saveDealerCars(); renderDealerCars(); } }
+    function renderDealerCars(){ let tbody=document.getElementById("dealerCarTable"); tbody.innerHTML=""; dealerCars.forEach((c,i)=>{ tbody.innerHTML+=`<tr><td>${c.model}</td><td>${c.dealer}</td><td>${formatKES(c.dealerPrice)}</td><td>${formatKES(c.yourPrice)}</td><td>${c.status}</td><td><button class="deleteBtn" onclick="deleteDealerCar(${i})">Delete</button></td></tr>`; }); }
+    renderDealerCars();
+
+    // ================= BUYERS =================
+    let buyers=JSON.parse(localStorage.getItem("buyers"))||[];
+    function saveBuyers(){ localStorage.setItem("buyers",JSON.stringify(buyers)); }
+    function addBuyer(){ buyers.push({name:buyerNameInput.value, phone:buyerPhone.value, budget:buyerBudget.value, car:buyerCar.value}); saveBuyers(); renderBuyers(); }
+    function deleteBuyer(i){ buyers.splice(i,1); saveBuyers(); renderBuyers(); }
+    function clearBuyers(){ if(confirm("Delete all buyers?")){ buyers=[]; saveBuyers(); renderBuyers(); } }
+    function renderBuyers(){ let tbody=document.getElementById("buyerTable"); tbody.innerHTML=""; buyers.forEach((b,i)=>{ tbody.innerHTML+=`<tr><td>${b.name}</td><td>${b.phone}</td><td>${b.budget}</td><td>${b.car}</td><td><button class="deleteBtn" onclick="deleteBuyer(${i})">Delete</button></td></tr>`; }); }
+    renderBuyers();
+
+    // ================= DEALS =================
+    let deals = JSON.parse(localStorage.getItem("deals")) || [];
+    function saveDeals(){ localStorage.setItem("deals", JSON.stringify(deals)); }
+    function addDeal(){
+        let salePrice = parseFloat(dealSalePrice.value);
+        let dealerPrice = parseFloat(dealDealerPrice.value);
+        let commission = salePrice - dealerPrice;
+        deals.push({ car: dealCar.value, buyer: dealBuyer.value, salePrice: salePrice, dealerPrice: dealerPrice, commission: commission });
+        saveDeals();
+        renderDeals();
+        document.getElementById("dealsForm").reset();
+    }
+    function deleteDeal(i){ if(confirm("Delete this deal?")){ deals.splice(i,1); saveDeals(); renderDeals(); } }
+    function clearDeals(){ if(confirm("Delete all deals?")){ deals = []; saveDeals(); renderDeals(); } }
+    function renderDeals(){
+        let tbody = document.getElementById("dealTable");
+        tbody.innerHTML = "";
+        let totalCommission = 0;
+
+        deals.forEach((d, i) => {
+            totalCommission += d.commission;
+            tbody.innerHTML += `<tr>
+                <td>${d.car}</td>
+                <td>${d.buyer}</td>
+                <td>${formatKES(d.salePrice)}</td>
+                <td>${formatKES(d.dealerPrice)}</td>
+                <td>${formatKES(d.commission)}</td>
+                <td><button class="deleteBtn" onclick="deleteDeal(${i})">Delete</button></td>
+            </tr>`;
+        });
+
+        document.getElementById("dealSummary").innerText = `Total Deals: ${deals.length} | Total Commission: ${formatKES(totalCommission)}`;
+    }
+
+    renderDeals();
+
+    // ================= EXPORT DEALS =================
+    function exportDeals(){
+        let csv = "Car,Buyer,Sale Price,Dealer Price,Commission\n";
+        deals.forEach(d => {
+            csv += `${d.car},${d.buyer},${d.salePrice},${d.dealerPrice},${d.commission}\n`;
+        });
+        let blob = new Blob([csv], { type: "text/csv" });
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "AoutLink_deals.csv";
+        link.click();
+    }
 </script>
-
 </body>
-
 </html>
+
